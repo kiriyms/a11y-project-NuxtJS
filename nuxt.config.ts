@@ -16,4 +16,7 @@ export default defineNuxtConfig({
       serverUrl: process.env.SERVER_URL,
     }
   },
+  experimental: {
+    cookieStore: true,
+  },
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
+import { useReportStore } from '~/composables/useReportStore';
 import type { Account } from '~/models/Account';
 
 definePageMeta({
@@ -7,12 +8,21 @@ definePageMeta({
     middleware: ['token-guard'],
 });
 
-const accessTokenCookie = useCookie('access-token')
+const pollingIntervals = new Map<string, ReturnType<typeof setInterval>>()
+
+const { accessToken } = useTokenStore()
+const { reports, updateReports, updateReport } = useReportStore()
 const config = useRuntimeConfig()
 const { data, refresh } = await useFetch<Account>(`${config.public.serverUrl}/auth/profile-info`, {
     headers: {
-        'Authorization': `Bearer ${accessTokenCookie.value}`,
+        'Authorization': `Bearer ${accessToken.value}`,
     },
+})
+updateReports(data.value?.reports ?? [])
+watch(data, () => updateReports(data.value?.reports ?? []))
+watch(reports, () => {
+    stopPolling()
+    startPolling()
 })
 
 const items = ref<TabsItem[]>([
@@ -27,6 +37,56 @@ const items = ref<TabsItem[]>([
     slot: 'account' as const
   }
 ])
+
+const authPollReport = useAuthFetch(pollReport)
+const pollReportStatus = (reportId: string) => {
+    const intervalId = setInterval(async () => {
+        const res = await authPollReport(reportId)
+
+        if (!res.refreshSuccess) { 
+            console.log('401: refresh not successful for pollreport in pollreportstatus') 
+            return
+        }
+        if (!res.result.success) { 
+            console.log() 
+            return
+        }
+
+        if (res.result.data.status === 'COMPLETED') {
+            console.log(`Report ${reportId} is completed.`)
+            clearInterval(pollingIntervals.get(reportId))
+            pollingIntervals.delete(reportId)
+
+            updateReport(res.result.data)
+        }
+    }, 10000)
+
+    console.log(`starting a polling func for report ${reportId}. Func: ${JSON.stringify(intervalId)}`)
+    pollingIntervals.set(reportId, intervalId)
+}
+const startPolling = () => {
+    const pendingReports = reports.value.filter(report => report.status === 'PENDING')
+
+    pendingReports.forEach(report => {
+        if (!pollingIntervals.has(report.id)) {
+            pollReportStatus(report.id)
+        }
+    });
+}
+const stopPolling = () => {
+    for (const intervalId of pollingIntervals.values()) {
+        clearInterval(intervalId)
+    }
+    pollingIntervals.clear()
+}
+
+onMounted(() => {
+    startPolling()
+})
+
+onBeforeUnmount(() => {
+    stopPolling()
+})
 </script>
 
 <template>
@@ -51,7 +111,7 @@ const items = ref<TabsItem[]>([
         >
             <template #reports>
                 <div class="ml-36">
-                    <PagesProfileTabsReports :data="data?.reports || []" :refresh="refresh" />
+                    <PagesProfileTabsReports :data="reports" :refresh="refresh" />
                 </div>
             </template>
             
@@ -79,7 +139,7 @@ const items = ref<TabsItem[]>([
         >
             <template #reports>
                 <div class="mt-14">
-                    <PagesProfileTabsReports :data="data?.reports || []" :refresh="refresh" />
+                    <PagesProfileTabsReports :data="reports" :refresh="refresh" />
                 </div>
             </template>
             

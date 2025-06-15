@@ -5,6 +5,14 @@ const props = defineProps({
         default: false,
     },
 });
+
+const { updateTokens } = useTokenStore();
+const authLogout = useAuthFetch(logoutUser);
+const logout = async () => {
+    await authLogout();
+    updateTokens("", "");
+    navigateTo("/auth/login");
+}
 </script>
 
 <template>
@@ -16,7 +24,7 @@ const props = defineProps({
             gap-2
         "
     >
-        <UButton label="Log Out" to="/" color="warning" />
+        <UButton label="Log Out" color="warning" @click="logout" />
         <LayoutsColorModeButton />
     </div>
 
@@ -29,6 +37,6 @@ const props = defineProps({
         "  
     >
         <LayoutsColorModeButton />
-        <UButton label="Log Out" to="/" color="warning" />
+        <UButton label="Log Out" color="warning" @click="logout" />
     </div>
 </template>

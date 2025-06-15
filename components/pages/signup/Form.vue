@@ -17,8 +17,7 @@ const state = reactive({
     repeatPassword: ''
 })
 
-const accessTokenCookie = useCookie('access-token')
-const refreshTokenCookie = useCookie('refresh-token')
+const { updateTokens } = useTokenStore();
 const config = useRuntimeConfig()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
     toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
@@ -33,10 +32,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             repeatPassword: event.data.repeatPassword
         }
     })
-    localStorage.setItem('access-token', res.accessToken)
-    localStorage.setItem('refresh-token', res.refreshToken)
-    accessTokenCookie.value = res.accessToken
-    refreshTokenCookie.value = res.refreshToken
+    updateTokens(res.accessToken, res.refreshToken)
     navigateTo('/profile')
     // ------------------
 }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { Report } from '~/models/Report';
+import { useReportStore } from '~/composables/useReportStore'
 
 const toast = useToast()
 type Schema = v.InferOutput<typeof schema>
@@ -14,34 +16,25 @@ const state = reactive({
 })
 
 const config = useRuntimeConfig()
+const { updateReport } = useReportStore()
+const accessTokenCookie = useCookie('access-token')
 async function onSubmit(event: FormSubmitEvent<Schema>) {
     toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
     console.log(event.data)
 
     // ------------------
-    const accessToken = localStorage.getItem('access-token')
-    const res: {     
-        id: string;
-        domain: string;
-        fileName: string | null;
-        passes: number | null;
-        incompletePasses: number | null;
-        violations: number | null;
-        jobErrorMessage: string | null;
-        status: string;
-        userId: string;
-        createdAt: Date;
-        updatedAt: Date; 
-    } = await $fetch(`${config.public.serverUrl}/report`, {
+    // const accessToken = localStorage.getItem('access-token')
+    const res = await $fetch<Report>(`${config.public.serverUrl}/report`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessTokenCookie.value}`,
         },
         body: {
             domain: event.data.url,
         }
     })
     console.log(res)
+    updateReport(res)
     // ------------------
 }
 </script>

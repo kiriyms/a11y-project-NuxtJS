@@ -4,9 +4,9 @@ import { FetchError } from 'ofetch'
 export default async function (): Promise<Result<boolean>> {
     const config = useRuntimeConfig()
     const { accessToken } = useTokenStore()
-    console.log(`confirm-token cookie: ${accessToken.value}`)
+    console.log(`report-poll-token cookie: ${accessToken.value}`)
     try {
-        const res = await $fetch<boolean>(`${config.public.serverUrl}/auth/confirm-token`, {
+        const res = await $fetch<boolean>(`${config.public.serverUrl}/auth/logout`, {
             headers: {
                 'Authorization': `Bearer ${accessToken.value}`,
             }

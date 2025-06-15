@@ -9,9 +9,7 @@ export default defineNuxtRouteMiddleware(async (_to, _from) => {
 
     console.log(`access: ${accessToken}`)
     console.log(`refresh: ${refreshToken}`)
-
-    localStorage.setItem('access-token', accessToken ?? '')
-    localStorage.setItem('refresh-token', refreshToken ?? '')
+    
     accessTokenCookie.value = accessToken
     refreshTokenCookie.value = refreshToken
 

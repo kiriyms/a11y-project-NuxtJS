@@ -1,12 +1,13 @@
 import type { Result } from "~/models/Result"
+import type { Report } from '~/models/Report';
 import { FetchError } from 'ofetch'
 
-export default async function (): Promise<Result<boolean>> {
+export default async function (reportId: string): Promise<Result<Report>> {
     const config = useRuntimeConfig()
     const { accessToken } = useTokenStore()
-    console.log(`confirm-token cookie: ${accessToken.value}`)
+    console.log(`report-poll-token cookie: ${accessToken.value}`)
     try {
-        const res = await $fetch<boolean>(`${config.public.serverUrl}/auth/confirm-token`, {
+        const res = await $fetch<Report>(`${config.public.serverUrl}/report/for-user/${reportId}`, {
             headers: {
                 'Authorization': `Bearer ${accessToken.value}`,
             }
