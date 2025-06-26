@@ -38,7 +38,8 @@ async function resend() {
             <h1 class="font-bold text-2xl mt-2">Subscription</h1>
             <div class="flex flex-col gap-2 mt-2 ml-4">
                 <p>Type: {{ props.data?.subscription }}</p>
-                <UButton label="Upgrade" to="/pricing" class="w-min" />
+                <UButton v-if="props.data?.subscription !== 'PREMIUM'" label="Upgrade" to="/profile/checkout" class="w-min" />
+                <UButton v-else label="Manage Subscription" :to="config.public.stripeManageSubscriptionUrl" external color="warning" class="w-min" />
             </div>
         </div>
     </div>

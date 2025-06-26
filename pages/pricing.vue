@@ -1,15 +1,15 @@
 <script setup lang="ts">
-const freeFeatures = ref<string[]>([
-    'Up to 5 reports per month', 
-    'Basic support', 
-    'Access to summaries',
+const freeFeatures = ref<string[][]>([
+    ['Up to 5 reports per month', 'true'], 
+    ['Basic support', 'true'], 
+    ['Access to summaries', 'true'],
 ])
-const premiumFeatures = ref<string[]>([
-    'Unlimited reports per month', 
-    'Advanced support', 
-    'Access to summaries', 
-    'Automatic monthly reports', 
-    'AI summaries and tips',
+const premiumFeatures = ref<string[][]>([
+    ['Unlimited reports per month', 'true'], 
+    ['Advanced support', 'true'], 
+    ['Access to summaries', 'true'], 
+    ['(Coming soon!) Automatic monthly reports', 'false'], 
+    ['(Coming soon!) AI summaries and tips', 'false'],
 ])
 </script>
 
@@ -17,6 +17,7 @@ const premiumFeatures = ref<string[]>([
     <div 
         class="
             flex flex-col
+            items-center
             gap-6
             p-4
             md:flex-row
@@ -34,11 +35,11 @@ const premiumFeatures = ref<string[]>([
         />
         <PagesPricingPricePlan 
             header-label="Premium" 
-            footer-label="Coming soon"
+            footer-label="Subscribe!"
             price="$ 15"
             :features="premiumFeatures"
-            :button-disabled="true"
-            button-link="/"
+            :button-disabled="false"
+            button-link="/profile/checkout"
         />
     </div>
 </template>

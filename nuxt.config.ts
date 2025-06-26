@@ -14,6 +14,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       serverUrl: process.env.SERVER_URL,
+      stripeManageSubscriptionUrl: process.env.STRIPE_MANAGE_SUBSCRIPTION_URL,
     }
   },
   experimental: {

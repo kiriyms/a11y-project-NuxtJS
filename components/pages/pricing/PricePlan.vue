@@ -13,7 +13,7 @@ const props = defineProps({
         required: true,
     },
     features: {
-        type: Array<string>,
+        type: Array<Array<string>>,
         required: true,
     },
     buttonDisabled: {
@@ -29,7 +29,7 @@ const { headerLabel, footerLabel, price, features, buttonDisabled, buttonLink } 
 </script>
 
 <template>
-    <UCard variant="solid" class="shadow-xl">
+    <UCard variant="solid" class="shadow-xl max-w-80">
         <template #header>
             <div 
                 class="
@@ -60,8 +60,9 @@ const { headerLabel, footerLabel, price, features, buttonDisabled, buttonLink } 
             </div>
             <ul>
                 <li v-for="(feature, index) in features" :key="index">
-                    <UIcon name="material-symbols:check-circle-outline" />
-                    {{ feature }}
+                    <UIcon v-if="feature[1] === 'true'" name="material-symbols:check-circle-outline" />
+                    <UIcon v-else name="material-symbols:lock-outline" />
+                    {{ feature[0] }}
                 </li>
             </ul>
         </div>

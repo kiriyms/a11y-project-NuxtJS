@@ -55,7 +55,7 @@ const footerItems = ref<NavigationMenuItem[][]>([[
                     "
                 >
                     <UIcon name="material-symbols:mail-outline-rounded" />
-                    <p>support@myachelp.com</p>
+                    <p>accessibilitysupp@gmail.com</p>
                 </div>
                 <!-- a href tel: -->
                 <!-- <div class="flex gap-2 items-center">
