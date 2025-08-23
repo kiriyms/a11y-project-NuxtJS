@@ -39,7 +39,7 @@ const premiumFeatures = ref<string[][]>([
             price="$ 15"
             :features="premiumFeatures"
             :button-disabled="false"
-            button-link="/profile/checkout"
+            button-link="/profile/checkout?redirectLink=checkout"
         />
     </div>
 </template>

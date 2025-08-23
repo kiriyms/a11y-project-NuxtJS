@@ -12,14 +12,19 @@ const pollingIntervals = new Map<string, ReturnType<typeof setInterval>>()
 
 const { accessToken } = useTokenStore()
 const { reports, updateReports, updateReport } = useReportStore()
+const { account, updateAccount, updateRemainingReports } = useAccountStore()
 const config = useRuntimeConfig()
-const { data, refresh } = await useFetch<Account>(`${config.public.serverUrl}/auth/profile-info`, {
+const { data, refresh, error } = await useFetch<Account>(`${config.public.serverUrl}/auth/profile-info`, {
     headers: {
         'Authorization': `Bearer ${accessToken.value}`,
     },
 })
 updateReports(data.value?.reports ?? [])
-watch(data, () => updateReports(data.value?.reports ?? []))
+updateAccount(data.value)
+watch(data, () => {
+    updateReports(data.value?.reports ?? [])
+    updateAccount(data.value)
+})
 watch(reports, () => {
     stopPolling()
     startPolling()
@@ -58,6 +63,31 @@ const pollReportStatus = (reportId: string) => {
             pollingIntervals.delete(reportId)
 
             updateReport(res.result.data)
+
+            toast.add({ 
+                title: 'Success', 
+                description: 'Your report is ready.', 
+                color: 'success',
+                icon: 'material-symbols:check',
+                duration: 0,
+            })
+        }
+
+        if (res.result.data.status === 'FAILED') {
+            console.log(`Report ${reportId} has failed.`)
+            clearInterval(pollingIntervals.get(reportId))
+            pollingIntervals.delete(reportId)
+
+            updateRemainingReports(account.value?.remainingReports ? account.value.remainingReports + 1 : -1)
+            updateReport(res.result.data)
+
+            toast.add({ 
+                title: 'Error', 
+                description: 'Failed to generate report. Please try again later.', 
+                color: 'error',
+                icon: 'material-symbols:cancel-outline',
+                duration: 0,
+            })
         }
     }, 10000)
 
@@ -80,8 +110,32 @@ const stopPolling = () => {
     pollingIntervals.clear()
 }
 
+const toast = useToast()
+watch(error, () => {
+    if (error.value) {
+        console.error(`Error fetching profile info [${error.value.status}]: ${error.value.message}. Please log in again.`)
+        toast.add({ 
+            title: 'Error', 
+            description: `Failed to fetch profile info [${error.value.status}]: ${error.value.message}. Please log in again.`, 
+            color: 'error',
+            icon: 'material-symbols:cancel-outline',
+            duration: 0,
+        })
+    }
+})
+
 onMounted(() => {
     startPolling()
+    if (error.value) {
+        console.error(`Error fetching profile info [${error.value.status}]: ${error.value.message}. Please log in again.`)
+        toast.add({ 
+            title: 'Error', 
+            description: `Failed to fetch profile info [${error.value.status}]: ${error.value.message}. Please log in again.`, 
+            color: 'error',
+            icon: 'material-symbols:cancel-outline',
+            duration: 0,
+        })
+    }
 })
 
 onBeforeUnmount(() => {

@@ -10,8 +10,21 @@ const props = defineProps({
 </script>
 
 <template>
-    <ul class="w-full flex flex-col space-y-2 mt-2">
-        <!-- <li v-for="report in data" :key="report.id" class="h-16 bg-blue-200">{{ report.id }}: {{ report.domain }}</li> -->
+    <div 
+        v-if="!props.data || props.data.length === 0"
+        class="
+            mt-2
+            text-2xl
+            text-muted
+            font-bold
+        "
+    >
+        No Reports to display
+    </div>
+    <ul
+        v-else
+        class="w-full flex flex-col space-y-2 mt-2"
+    >
         <PagesProfileTabsReportsCard 
             v-for="report in props.data" :key="report.id" 
             :date="report.createdAt.toString()"

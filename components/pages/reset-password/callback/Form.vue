@@ -2,40 +2,65 @@
 import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
+const toast = useToast()
 type Schema = v.InferOutput<typeof schema>
 
-const isConsented = ref(false)
-
 const schema = v.object({
-    email: v.pipe(v.string(), v.email('Invalid email')),
     password: v.pipe(v.string(), v.minLength(8, 'Must be at least 8 characters')),
     repeatPassword: v.pipe(v.string(), v.minLength(8, 'Must be at least 8 characters'))
 })
 
 const state = reactive({
-    email: '',
     password: '',
     repeatPassword: ''
 })
 
-const { updateTokens } = useTokenStore();
+const disabled = ref(false)
 const config = useRuntimeConfig()
+const { resetPasswordToken } = useResetPasswordTokenStore()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
     console.log(event.data)
+    
+    disabled.value = true
 
     // ------------------
-    const res: { accessToken: string, refreshToken: string } = await $fetch(`${config.public.serverUrl}/auth/register`, {
-        method: 'POST',
-        body: {
-            email: event.data.email,
-            password: event.data.password,
-            repeatPassword: event.data.repeatPassword
-        }
-    })
-    updateTokens(res.accessToken, res.refreshToken)
-    navigateTo('/profile')
+    try {
+        const res: boolean = await $fetch(`${config.public.serverUrl}/auth/password/reset/callback`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${resetPasswordToken.value}`
+            },
+            body: {
+                password: event.data.password,
+                repeatPassword: event.data.repeatPassword
+            }
+        })
+        toast.add({ 
+            title: 'Success', 
+            description: 'Password reset. Please log in again.', 
+            color: 'success', 
+            icon: 'material-symbols:check',
+            duration: 0 
+        })
+        console.log(`Password reset init response: ${res}`)
+    } catch (error) {
+        toast.add({ 
+            title: 'Error', 
+            description: 'Failed to reset password. Please try again later.', 
+            color: 'error', 
+            icon: 'material-symbols:cancel-outline',
+            duration: 0 
+        })
+        console.error('Error resetting password:', error)
+    } finally {
+        disabled.value = false
+    }
     // ------------------
 }
+
+onMounted(() => {
+    console.log(`Reset Password Token: ${resetPasswordToken.value}`)
+})
 </script>
 
 <template>
@@ -47,13 +72,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         " 
         @submit="onSubmit"
     >
-        <UFormField label="Email" name="email" required>
-            <UInput 
-                v-model="state.email"
-                placeholder="john.doe@gmail.com" 
-                class="w-full" 
-            />
-        </UFormField>
         <UFormField label="Password" name="password" required>
             <UInput 
                 v-model="state.password" 
@@ -70,18 +88,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 class="w-full" 
             />
         </UFormField>
-        <UCheckbox v-model="isConsented" required label="I have read and agree to the Conditions of Use, Terms of Service and Privacy Policy">
-            <template #label>
-                I have read and agree to the <NuxtLink to="/conditions-and-privacy" target="_blank"  class="text-primary font-bold underline">Conditions of Use, Terms of Service and Privacy Policy</NuxtLink>
-            </template>
-        </UCheckbox>
         <div 
             class="
                 flex 
                 justify-center
             "
         >
-            <UButton :disabled="!isConsented" type="submit" class="rounded-full">
+            <UButton :disabled="disabled" type="submit" class="rounded-full">
                 Continue
             </UButton>
         </div>

@@ -50,6 +50,9 @@ function oAuth() {
             </div>
         </template>
     </UCard>
+    <div class="self-center text-center w-78 md:w-110">
+        <span>By Signing Up or Logging In with Google, you agree to our</span> <NuxtLink to="/conditions-and-privacy" target="_blank"  class="text-primary font-bold underline">Conditions of Use, Terms of Service and Privacy Policy</NuxtLink>
+    </div>
     <UButton
         label="Log in with Google"
         icon="ci:google"

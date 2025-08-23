@@ -37,12 +37,6 @@ const items = ref<NavigationMenuItem[][]>([[
         to: '/faq',
         onSelect: closeSlideover
     },
-    {
-        label: 'Legal',
-        icon: 'material-symbols:edit-document-outline',
-        to: '/legal',
-        onSelect: closeSlideover
-    },
 ]])
 </script>
 

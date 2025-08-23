@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import type { Report } from '~/models/Report';
 import { useReportStore } from '~/composables/useReportStore'
+
+const { account, updateRemainingReports } = useAccountStore()
 
 const toast = useToast()
 type Schema = v.InferOutput<typeof schema>
@@ -15,26 +16,46 @@ const state = reactive({
     url: '',
 })
 
-const config = useRuntimeConfig()
 const { updateReport } = useReportStore()
-const accessTokenCookie = useCookie('access-token')
+const authGenerateReport = useAuthFetch(initiateGenerateReport)
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
     console.log(event.data)
 
     // ------------------
-    // const accessToken = localStorage.getItem('access-token')
-    const res = await $fetch<Report>(`${config.public.serverUrl}/report`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessTokenCookie.value}`,
-        },
-        body: {
-            domain: event.data.url,
-        }
+    const res = await authGenerateReport(event.data.url)
+    
+    if (!res.refreshSuccess) {
+        console.error('401: refresh not successful for generate report')
+        toast.add({ 
+            title: 'Error', 
+            description: 'Failed to generate report. Please log in again.', 
+            color: 'error', 
+            icon: 'material-symbols:cancel-outline',
+            duration: 0 
+        })
+        navigateTo('/auth/login')
+    }
+    if (!res.result.success) {
+        console.error(`Error generating report: [${res.result.error.code}] ${res.result.error.message}`)
+        toast.add({ 
+            title: 'Error', 
+            description: `Error generating report: [${res.result.error.code}] ${res.result.error.message}`, 
+            color: 'error', 
+            icon: 'material-symbols:cancel-outline',
+            duration: 0 
+        })
+        return
+    }
+
+    toast.add({ 
+        title: 'Report pending', 
+        description: 'URL has been submitted. Please wait for the report to be generated.', 
+        color: 'warning',
+        icon: 'material-symbols:hourglass-top',
+        duration: 0,
     })
-    console.log(res)
-    updateReport(res)
+    updateReport(res.result.data)
+    updateRemainingReports(account.value?.remainingReports ? account.value.remainingReports - 1 : -1)
     // ------------------
 }
 </script>
@@ -66,12 +87,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <div 
             class="
                 flex 
-                justify-center
+                justify-center items-center
+                gap-4
+                font-bold
             "
         >
             <UButton type="submit" class="rounded-full">
                 Generate Report
             </UButton>
+            <div v-if="account?.subscription !== 'PREMIUM'">Remaining reports this month: {{ account?.remainingReports }}/5</div>
+            <div v-else><span class="text-warning">Premium</span>: no monthly limit</div>
         </div>
     </UForm>
 </template>

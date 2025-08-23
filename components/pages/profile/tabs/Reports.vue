@@ -9,7 +9,7 @@ const props = defineProps({
     refresh: {
         type: Function,
         required: true,
-    }
+    },
 });
 </script>
 

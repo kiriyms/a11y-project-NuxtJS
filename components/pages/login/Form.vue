@@ -2,7 +2,6 @@
 import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-const toast = useToast()
 type Schema = v.InferOutput<typeof schema>
 
 const schema = v.object({
@@ -18,20 +17,46 @@ const state = reactive({
 
 const { updateTokens } = useTokenStore();
 const config = useRuntimeConfig()
+const route = useRoute()
+const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
     console.log(event.data)
 
     // ------------------
-    const res: { accessToken: string, refreshToken: string } = await $fetch(`${config.public.serverUrl}/auth/login`, {
-        method: 'POST',
-        body: {
-            email: event.data.email,
-            password: event.data.password
+    try {
+        const res: { accessToken: string, refreshToken: string } = await $fetch(`${config.public.serverUrl}/auth/login`, {
+            method: 'POST',
+            body: {
+                email: event.data.email,
+                password: event.data.password
+            }
+        })
+        updateTokens(res.accessToken, res.refreshToken)
+
+        if (route.query.redirectLink) {
+            const redirectLink = route.query.redirectLink as string
+            console.log(`Redirecting to: ${redirectLink}`)
+
+            switch (redirectLink) {
+                case 'checkout':
+                    navigateTo('/profile/checkout')
+                    break;
+                default:
+                    console.warn(`Unknown redirect link: ${redirectLink}`)
+                    navigateTo('/profile')
+                    break;
+            }
         }
-    })
-    updateTokens(res.accessToken, res.refreshToken)
-    navigateTo('/profile')
+    } catch (error) {
+        console.error(error)
+        toast.add({ 
+            title: 'Error', 
+            description: `Failed to log in. Please check your credentials: ${error}`, 
+            color: 'error', 
+            icon: 'material-symbols:cancel-outline',
+            duration: 0 
+        })
+    }
     // ------------------
 }
 </script>
@@ -58,6 +83,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 placeholder="********"
                 type="password" 
                 class="w-full" 
+            />
+            <UButton 
+                label="Forgot your password?" 
+                variant="link" 
+                to="/reset-password" 
+                class="
+                    text-primary underline px-1
+                " 
             />
         </UFormField>
         <div 

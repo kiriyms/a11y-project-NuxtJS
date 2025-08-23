@@ -3,12 +3,8 @@ import type { NavigationMenuItem } from '@nuxt/ui';
 
 const footerItems = ref<NavigationMenuItem[][]>([[
     {
-        label: 'Conditions of Use',
-        to: '/conditions',
-    },
-    {
-        label: 'Privacy Notice',
-        to: '/privacy'
+        label: 'Conditions of Use & Privacy Notice',
+        to: '/conditions-and-privacy',
     },
 ]])
 </script>
