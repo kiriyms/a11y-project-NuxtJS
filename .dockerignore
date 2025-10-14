@@ -1,0 +1,30 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+.nuxt
+.output
+dist
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Git files
+.git
+.gitignore
+
+# Editor/IDE stuff
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (if you want smaller build context)
+Dockerfile
+.dockerignore
