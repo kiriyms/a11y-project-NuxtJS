@@ -13,8 +13,8 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     public: {
-      serverUrl: process.env.SERVER_URL,
-      stripeManageSubscriptionUrl: process.env.STRIPE_MANAGE_SUBSCRIPTION_URL,
+      serverUrl: process.env.NUXT_PUBLIC_SERVER_URL,
+      stripeManageSubscriptionUrl: process.env.NUXT_PUBLIC_STRIPE_MANAGE_SUBSCRIPTION_URL,
     }
   },
   experimental: {

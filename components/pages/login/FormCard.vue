@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 function oAuth() {
+    console.log('OAuth login initiated', config.public.serverUrl);
     window.location.href = `${config.public.serverUrl}/auth/google`
 }
 </script>
