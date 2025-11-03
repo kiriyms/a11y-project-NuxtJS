@@ -46,6 +46,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                     navigateTo('/profile')
                     break;
             }
+        } else {
+            navigateTo('/profile')
         }
     } catch (error) {
         console.error(error)
