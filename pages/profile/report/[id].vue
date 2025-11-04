@@ -21,7 +21,7 @@ const config = useRuntimeConfig()
     >
         <UButton icon="material-symbols:arrow-back" label="Back" to="/profile" class="max-w-fit" />
         <iframe
-            :src="'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + config.public.serverUrl + '/' + (report.result.success ? report.result.data.fileName : '')"
+            :src="`https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(config.public.serverUrl + '/reports/raw/' + (report.result.success ? report.result.data.fileName?.split('/').pop() : ''))}`"
             class="flex-1"
         ></iframe>
     </div>
